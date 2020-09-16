@@ -6,7 +6,7 @@ pipeline {
             steps {
                 script
                 {
-                    if (fileExists('test')) 
+                    if (fileExists('workshop-demo')) 
                     {
                         dir("${env.WORKSPACE}/workshop-demo")
                         {
