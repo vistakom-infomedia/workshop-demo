@@ -1,8 +1,32 @@
 pipeline {
     agent any
-    
     stages {
-        stage('Build') {
+       stage('SCM') {
+             agent any
+            steps {
+                script
+                {
+                    if (fileExists('test')) 
+                    {
+                        dir("${env.WORKSPACE}/workshop-demo")
+                        {
+                            sh "git pull origin master" 
+                        }
+                    }
+                    else
+                    {
+                        withCredentials([
+                                         conjurSecretCredential(credentialsId: 'github_username', variable: 'USERNAME'),
+                                         conjurSecretCredential(credentialsId: 'github_access_token', variable: 'PASSWORD')
+                                       ])
+				        {
+                            sh "git clone https://$USERNAME:$PASSWORD@github.com/$USERNAME/test.git" 
+				        } 
+                    }   
+                }
+            }
+        } 
+       stage('Build') {
              agent any
             steps {
 				sh "docker pull gcr.io/google_samples/gb-redisslave:v1"
@@ -16,9 +40,12 @@ pipeline {
         stage('Ship') {
              agent any
             steps {
-				withCredentials([conjurSecretCredential(credentialsId: 'vistakom/dockerhub', variable: 'SECRET')])
+				withCredentials([
+                                                 conjurSecretCredential(credentialsId: 'dockerhub_username', variable: 'USERNAME'),
+                                                 conjurSecretCredential(credentialsId: 'dockerhub_password', variable: 'PASSWORD')
+                                               ])
 				{
-					sh "docker login -u vistakom -p $SECRET"
+					sh "docker login -u $USERNAME -p $PASSWORD"
 				} 
 		
 				sh "docker push vistakom/guestbook-tutorial:1.3"
