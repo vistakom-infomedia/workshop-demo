@@ -1,0 +1,58 @@
+
+pipeline {
+    agent any
+    
+    stages {
+        stage('Build') {
+             agent any
+            steps {
+
+				sh "docker pull redis"
+				
+				aqua customFlags: '', hideBase: false, hostedImage: '', localImage: 'redis:latest', locationType: 'local', notCompliesCmd: '', onDisallowed: 'fail', policies: '', register: true, registry: 'Docker Hub', showNegligible: true
+
+				sh "docker pull gcr.io/google_samples/gb-redisslave:v1"
+				
+				aqua customFlags: '', hideBase: false, hostedImage: '', localImage: 'gcr.io/google_samples/gb-redisslave:v1', locationType: 'local', notCompliesCmd: '', onDisallowed: 'fail', policies: '', register: true, registry: 'Docker Hub', showNegligible: true
+				
+				sh "docker pull gcr.io/google-samples/gb-frontend:v4"
+		
+				aqua customFlags: '', hideBase: false, hostedImage: '', localImage: 'gcr.io/google-samples/gb-frontend:v4', locationType: 'local', notCompliesCmd: '', onDisallowed: 'fail', policies: '', register: true, registry: 'Docker Hub', showNegligible: true
+				
+				sh "docker build -t vistakom/guestbook-tutorial:1.0 ."
+				
+				aqua customFlags: '', hideBase: false, hostedImage: '', localImage: 'vistakom/guestbook-tutorial:1.0', locationType: 'local', notCompliesCmd: '', onDisallowed: 'fail', policies: '', register: true, registry: 'Docker Hub', showNegligible: true
+				
+            }
+        }
+        stage('Ship') {
+             agent any
+            steps {
+				withCredentials([conjurSecretCredential(credentialsId: 'vistakom/dockerhub', variable: 'SECRET')]) 
+				{
+					sh "docker login -u vistakom -p $SECRET"
+				} 
+		
+				sh "docker push vistakom/guestbook-tutorial:1.0"
+            }
+        }
+		stage('Deploy') {
+             agent any
+            steps {
+				
+				sh "kubectl apply -f deploy/namespace.yaml --kubeconfig ~/kubernetes-credential/config"
+				
+				sh "kubectl apply -f deploy/redis-master-deployment.yaml -n guestbook-tutorial --kubeconfig ~/kubernetes-credential/config"
+				sh "kubectl apply -f deploy/redis-master-service.yaml -n guestbook-tutorial --kubeconfig ~/kubernetes-credential/config"
+				
+				sh "kubectl apply -f deploy/redis-slave-deployment.yaml -n guestbook-tutorial --kubeconfig ~/kubernetes-credential/config"
+				sh "kubectl apply -f deploy/redis-slave-service.yaml -n guestbook-tutorial --kubeconfig ~/kubernetes-credential/config"
+				
+				sh "kubectl apply -f deploy/frontend-deployment.yaml -n guestbook-tutorial --kubeconfig ~/kubernetes-credential/config"
+				sh "kubectl apply -f deploy/frontend-service.yaml -n guestbook-tutorial --kubeconfig ~/kubernetes-credential/config"
+				
+				sh "kubectl get po -n guestbook-tutorial --kubeconfig ~/kubernetes-credential/config"
+            }
+        }
+    }
+}
