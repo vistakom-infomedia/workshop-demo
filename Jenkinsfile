@@ -20,7 +20,7 @@ pipeline {
                                          conjurSecretCredential(credentialsId: 'github_access_token', variable: 'PASSWORD')
                                        ])
 				        {
-                            sh "git clone https://$USERNAME:$PASSWORD@github.com/$USERNAME/test.git" 
+                            sh "git clone https://$USERNAME:$PASSWORD@github.com/$USERNAME/workshop-demo.git" 
 				        } 
                     }   
                 }
