@@ -6,7 +6,7 @@ default ignore = false
 
 ignore_pkgs := {""}
 
-ignore_severities := {"CRITICAL"}
+ignore_severities := {"UNKNOWN","LOW","MEDIUM","HIGH"}
 
 nvd_v3_vector = v {
         v := input.CVSS.nvd.v3
