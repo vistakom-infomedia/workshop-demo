@@ -18,7 +18,9 @@ spec:
       restartPolicy: Always
       containers:
       - name: php-redis
-        image: vistakom/guestbook-tutorial:1.3
+        image: vistakom/guestbook-tutorial:1.5
+        securityContext:
+          privileged: true
         resources:
           requests:
             cpu: 100m
