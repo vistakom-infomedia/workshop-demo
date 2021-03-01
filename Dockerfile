@@ -1,11 +1,14 @@
 FROM vistakom/guestbook-gke-tutorial:1.0
 
+# RUN  apt-get update 
+
+ RUN  apt-get update 
+ RUN  apt-get install -y iputils-ping 
+ RUN  apt upgrade -y
+
 COPY src /var/www/html
 
-RUN apt-get dist-upgrade -y
-# RUN  apt-get update 
-# RUN  apt upgrade -y
-# RUN  apt-get install -y iputils-ping 
+RUN useradd -ms /bin/bash admin
+USER admin
 
 WORKDIR /var/www/html
-
