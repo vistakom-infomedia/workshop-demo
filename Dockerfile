@@ -8,7 +8,7 @@ FROM vistakom/guestbook-gke-tutorial:1.0
 
 COPY src /var/www/html
 
-RUN useradd -ms /bin/bash admin
-USER admin
+#RUN useradd -ms /bin/bash admin
+#USER admin
 
 WORKDIR /var/www/html
