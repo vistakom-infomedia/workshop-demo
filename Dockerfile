@@ -1,7 +1,7 @@
 FROM vistakom/guestbook-gke-tutorial:1.0
 
 # RUN  apt-get update 
-
+ LABEL maintener="Vistakom Infomedia"
  RUN  apt-get update 
  RUN  apt-get install -y iputils-ping 
  RUN  apt upgrade -y
